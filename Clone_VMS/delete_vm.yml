@@ -1,0 +1,28 @@
+---
+- name: Delete a vsphere ESXI VM
+  hosts: localhost
+  connection: local
+
+#  vars_files:
+#    - args.yml
+
+  vars_prompt:
+    - name: vcenter_user
+      prompt: "Vcenter Username"
+      private: no
+    - name: vcenter_pass
+      prompt: "Password"
+
+
+  tasks:
+    - vmware_guest:
+        hostname: VCENTER_NAMER_OR_IP
+        validate_certs: no
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_pass }}"
+        name: "{{ item.name }}"
+        state: absent
+        force: yes
+
+      with_items:
+         - { name: 'VM_TO_BE_DELETED' }
