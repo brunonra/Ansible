@@ -1,0 +1,3 @@
+[Example]
+
+DESTINE_NAME guest_template='CLONE_ORIGIN_NAME' deploy_vsphere_datastore='DESTINATION_DATASTORE' guest_custom_ip='IP' guest_network='VLAN' guest_gateway='GATEWAY' guest_custom_ip2='SECOND_IP' guest_network2='SECOND_VLAN' guest_notes='NOTES_THAT_SHOW_ON_VCENTER' deploy_vsphere_cluster='DEPLOY_CLUSTER'
