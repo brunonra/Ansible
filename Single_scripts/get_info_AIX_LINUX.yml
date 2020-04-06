@@ -1,0 +1,92 @@
+---
+ - hosts: Linux
+   gather_facts: yes
+
+   tasks:
+     - name: Versao do SO (Linux)
+       debug:
+         msg: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
+       register: versao_result
+
+     - name: Pega hostname (Linux)
+       shell: hostname
+       register: hn_result
+       ignore_errors: true
+
+     - name: Pega CPU (Linux)
+       shell: cat /proc/cpuinfo | grep processor | wc -l
+       register: cpun_result
+       ignore_errors: true
+
+     - name: Pega Memoria (Linux)
+       shell: cat /proc/meminfo | grep -i "memtotal"
+       register: memt_result
+       ignore_errors: true
+
+     - name: Pega kernel (Linux)
+       shell: uname -r
+       register: krnv_result
+       ignore_errors: true
+
+     - name: Pega Virtualizador (Linux)
+       shell: dmidecode -t1 | grep -i "Product Name:" | cut -d " " -f 3
+       register: lpr_result
+       ignore_errors: true
+
+     - name: Pega IP (Linux)
+       shell: hostname -i |cut -d " " -f1
+       register: ipadr_result
+       ignore_errors: true
+
+ - hosts: Aix
+   gather_facts: yes
+
+   tasks:
+     - name: Versao do SO (AIX)
+       debug:
+         msg: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
+       register: versao_result
+
+     - name: Pega hostname (AIX)
+       shell: hostname
+       register: hn_result
+       ignore_errors: true
+
+     - name: Pega CPU (AIX)
+       shell: prtconf | grep -i 'Number Of Processors' |cut -d ':' -f 2
+       register: cpun_result
+       ignore_errors: true
+
+     - name: Pega Memoria (AIX)
+       shell: prtconf |grep -i "^Memory Size:" | cut -d " " -f3,4,5
+       register: memt_result
+       ignore_errors: true
+
+     - name: Pega Kernel (AIX)
+       shell: oslevel
+       register: krnv_result
+       ignore_errors: true
+
+     - name: Pega LPAR (AIX)
+       shell: prtconf |grep -i "^LPAR" | cut -d " " -f 4
+       register: lpr_result
+       ignore_errors: true
+
+     - name: Pega IP (AIX)
+       shell: prtconf |grep -i "IP Address" | cut -d " " -f 3
+       register: ipadr_result
+       ignore_errors: true
+
+
+ - hosts: all
+
+   tasks:
+     - name: Anexa conteudo ao arquivo (teste AIX)
+       lineinfile:
+         dest: DESTINANTION_PATH
+         line: "Hostname: {{ hn_result.stdout_lines }} - SO: {{ versao_result }} - Kernel: {{ krnv_result.stdout }} - CPUs: {{ cpun_result.stdout }} - Memoria: {{ memt_result.stdout }} - Virtualizador: {{ lpr_result.stdout }} - IP: {{ ipadr_result.stdout }}"
+         insertafter: EOF
+       delegate_to: localhost
+     - name: Padroniza arquivo
+       script: DESTINANTION_PATH/pr2.sh # this shell uses regular expression to format the file in a default way.
+       delegate_to: localhost

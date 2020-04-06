@@ -1,0 +1,248 @@
+---
+ - hosts: Oracle # change for the name you want to use on inventory
+   vars:
+       reldest: DEFAULT_PATCH_YOU_WILL_USE
+   gather_facts: no
+   tasks:
+
+     - name: Get username
+       shell: grep oracle /etc/passwd | cut -d ":" -f 1 | head -n 1
+       register: oranm_result
+
+     # Like IF in shell script, WHEN is used to check conditions
+     - name: checking NAME (OK)
+       shell: echo "Nome Oracle -- OK" > {{ reldest }}{{ inventory_hostname }}.txt
+       when: oranm_result.stdout == "oracle"
+       delegate_to: localhost
+     - name: Validando NOME (NOK)
+       shell: echo "Nome Oracle -- NOK" > {{ reldest }}{{ inventory_hostname }}.txt
+       when: oranm_result.stdout != "oracle"
+       delegate_to: localhost
+
+     # get USERID 
+     - name: Coleta ID
+       shell: grep oracle /etc/passwd | cut -d ":" -f 3 | head -n 1
+       register: oraid_result
+     - name: Validando ID (OK)
+       shell: echo "ID Oracle -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: oraid_result.stdout == "xxx"
+       delegate_to: localhost
+     - name: Validando ID (NOK)
+       shell: echo "ID Oracle -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: oraid_result.stdout != "xxx"
+       delegate_to: localhost
+
+     # Coleta o shadow pra saber a senha do oracle
+     - name: Coleta Senha ORACLE
+       shell: grep oracle /etc/shadow | cut -d ":" -f2
+       register: orash_result
+     - name: Validando senha ORACLE (OK)
+       shell: echo "SENHA Oracle -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: orash_result.stdout == "passwd_HASH"
+       delegate_to: localhost
+     - name: Validando senha ORACLE (NOK)
+       shell: echo "SENHA Oracle -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: orash_result.stdout != "passwd_HASH"
+       delegate_to: localhost
+
+     # Valida usuario suporacle
+     - name: Coleta nome SUPORACLE
+       shell: grep suporacle /etc/passwd | cut -d ":" -f 1 | head -n 1
+       register: sour_result
+     - name: Coleta ID SUPORACLE
+       shell: grep suporacle /etc/passwd | cut -d ":" -f 3 | head -n 1
+       register: soid_result
+     - name: Valida nome SUPORACLE (OK)
+       shell: echo "USUARIO suporacle -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: sour_result.stdout == "suporacle"
+       delegate_to: localhost
+     - name: Valida SUPORACLE (NOK)
+       shell: echo "USUARIO suporacle -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: sour_result.stdout != "suporacle"
+       delegate_to: localhost
+
+     - name: Valida ID SUPORACLE (OK)
+       shell: echo "ID suporacle -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: soid_result.stdout == "GID"
+       delegate_to: localhost
+     - name: Valida ID SUPORACLE (NOK)
+       shell: echo "ID suporacle -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: soid_result.stdout != "GID"
+       delegate_to: localhost
+
+     # Valida Grupos do usuario ORACLE
+     - name: Coletando GRUPO dba
+       shell: grep dba /etc/group | head -n 1 | cut -d ":" -f1
+       register: ngdba_result
+     - name: Valida GRUPO dba (OK)
+       shell: echo "GRUPO dba -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngdba_result.stdout == "dba"
+       delegate_to: localhost
+     - name: Valida GRUPO dba (NOK)
+       shell: echo "GRUPO dba -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngdba_result.stdout != "dba"
+
+     - name: Validando GID dba
+       shell: grep dba /etc/group | head -n 1 | cut -d ":" -f3
+       register: igdba_result
+     - name: Valida GID dba (OK)
+       shell: echo "GID dba -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igdba_result.stdout == "GID2"
+       delegate_to: localhost
+     - name: Valida GID dba (NOK)
+       shell: echo "GID dba -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igdba_result.stdout != "GID2"
+       delegate_to: localhost
+
+     # Valida grupo OINSTALL
+     - name: Coletando GRUPO oinstall
+       shell: grep oinstall /etc/group | head -n 1 | cut -d ":" -f1
+       register: ngoin_result
+     - name: Valida GRUPO oinstall (OK)
+       shell: echo "GRUPO oinstall -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngoin_result.stdout == "oinstall"
+       delegate_to: localhost
+     - name: Valida GRUPO oinstall (NOK)
+       shell: echo "GRUPO oinstall -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngoin_result.stdout != "oinstall"
+
+     - name: Validando GID oisntall
+       shell: grep oinstall /etc/group | head -n 1 | cut -d ":" -f3
+       register: igoin_result
+     - name: Valida GID oinstall (OK)
+       shell: echo "GID oinstall -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igoin_result.stdout == "xxx"
+       delegate_to: localhost
+     - name: Valida GID dba (NOK)
+       shell: echo "GID oinstall -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igoin_result.stdout != "xxx"
+       delegate_to: localhost
+
+     # Valida grupo OPER
+     - name: Coletando GRUPO oper
+       shell: grep oper /etc/group | head -n 1 | cut -d ":" -f1
+       register: ngope_result
+     - name: Valida GRUPO oper (OK)
+       shell: echo "GRUPO oper -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngope_result.stdout == "oper"
+       delegate_to: localhost
+     - name: Valida GRUPO oper (NOK)
+       shell: echo "GRUPO oper -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngope_result.stdout != "oper"
+       delegate_to: localhost
+
+     - name: Validando GID oper
+       shell: grep oper /etc/group | head -n 1 | cut -d ":" -f3
+       register: igope_result
+     - name: Valida GID oper (OK)
+       shell: echo "GID oper -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igope_result.stdout == "GID3"
+       delegate_to: localhost
+     - name: Valida GID oper (NOK)
+       shell: echo "GID oper -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igope_result.stdout != "GID3"
+       delegate_to: localhost
+
+     # Valida grupo ASMOPER
+     - name: Coletando GRUPO asmoper
+       shell: grep asmoper /etc/group | head -n 1 | cut -d ":" -f1
+       register: ngasmo_result
+     - name: Valida GRUPO asmoper (OK)
+       shell: echo "GRUPO asmoper -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngasmo_result.stdout == "asmoper"
+       delegate_to: localhost
+     - name: Valida GRUPO asmoper (NOK)
+       shell: echo "GRUPO asmoper -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngasmo_result.stdout != "asmoper"
+
+     - name: Validando GID asmoper
+       shell: grep asmoper /etc/group | head -n 1 | cut -d ":" -f3
+       register: igasmo_result
+     - name: Valida GID asmoper (OK)
+       shell: echo "GID asmoper -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igasmo_result.stdout == "GID4"
+       delegate_to: localhost
+     - name: Valida GID asmoper (NOK)
+       shell: echo "GID asmoper -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igasmo_result.stdout != "GID4"
+       delegate_to: localhost
+
+     # Valida grupo ASMADMIN
+     - name: Coletando GRUPO asmadmin
+       shell: grep asmadmin /etc/group | head -n 1 | cut -d ":" -f1
+       register: ngasma_result
+     - name: Valida GRUPO asmadmin (OK)
+       shell: echo "GRUPO asmadmin -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngasma_result.stdout == "asmadmin"
+       delegate_to: localhost
+     - name: Valida GRUPO asmadmin (NOK)
+       shell: echo "GRUPO asmadmin -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngasma_result.stdout != "asmadmin"
+
+     - name: Validando GID asmadmin
+       shell: grep asmadmin /etc/group | head -n 1 | cut -d ":" -f3
+       register: igasma_result
+     - name: Valida GID asmadmin (OK)
+       shell: echo "GID asmadmin -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igasma_result.stdout == "GID5"
+       delegate_to: localhost
+     - name: Valida GID asmadmin (NOK)
+       shell: echo "GID asmadmin -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igasma_result.stdout != "GID5"
+       delegate_to: localhost
+
+     # Valida grupo ASMDBA
+     - name: Coletando GRUPO asmdba
+       shell: grep asmdba /etc/group | head -n 1 | cut -d ":" -f1
+       register: ngasmd_result
+     - name: Valida GRUPO asmdba (OK)
+       shell: echo "GRUPO asmdba -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngasmd_result.stdout == "asmdba"
+       delegate_to: localhost
+     - name: Valida GRUPO asmdba (NOK)
+       shell: echo "GRUPO asmdba -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: ngasmd_result.stdout != "asmdba"
+
+     - name: Validando GID asmdba
+       shell: grep asmdba /etc/group | head -n 1 | cut -d ":" -f3
+       register: igasmd_result
+     - name: Valida GID asmdba (OK)
+       shell: echo "GID asmdba -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igasmd_result.stdout == "GID6"
+       delegate_to: localhost
+     - name: Valida GID asmdba (NOK)
+       shell: echo "GID asmdba -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when: igasmd_result.stdout != "GID6"
+       delegate_to: localhost
+     # Ate aqui valida os grupos, vamos ver se vai rodar td certinho
+
+     # Daqui para baixo comeca a validacao de discos e FS:
+     - name: Validando FS /u01
+       shell: mount | grep lv_u01| cut -d " " -f1
+       register: mu01_result
+     - name: Validando owner do FS /u01
+       shell: mount | grep lv_u01| cut -d " " -f1
+       register: ou01_result
+     - name: Validando grupo do FS /u01
+       shell: ls -ld /u01 | cut -d " " -f4
+       register: gu01_result
+     - name: Validando FSTAB do FS /u01
+       shell: grep lv_u01 /etc/fstab
+       register: fstu01_result
+       ignore_errors: True
+     - name: FS /U01 (OK)
+       shell: echo "FS /U01 -- OK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when:
+         - mu01_result.stdout == "/dev/mapper/appvg-lv_u01"
+         - ou01_result.stdout == "oracle"
+         - gu01_result.stdout == "oinstall"
+         - fstu01_result.rc == 0
+       delegate_to: localhost
+     - name: FS /u01 (NOK)
+       shell: echo "FS /UO1 -- NOK" >> {{ reldest }}{{ inventory_hostname }}.txt
+       when:
+         - mu01_result.stdout != 0
+         - ou01_result.stdout != 0
+         - gu01_result.stdout != 0
+         - fstu01_result.rc != 0
+       delegate_to: localhost

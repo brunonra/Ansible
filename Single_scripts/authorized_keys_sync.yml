@@ -1,0 +1,37 @@
+---
+ - hosts: Root
+
+   vars:
+       rauthok: PATCH/root_auth_OK.txt
+   gather_facts: no
+
+   tasks:
+     - name: Looking for default 1
+       register: def1_result
+       shell: "grep -i 'DEFAULT_INFO' /root/.ssh/authorized_keys"
+       ignore_errors: True
+
+     - name: Looking for default 2
+       register: def2_result
+       shell: "grep -i 'DEFAULT_INFO2' /root/.ssh/authorized_keys"
+       ignore_errors: True
+
+     - name: Check the number os key entrances
+       register: qnt_result
+       shell: "grep ssh .ssh/authorized_keys |  wc -l"
+       ignore_errors: True
+
+     - name: starting to padronize
+       shell: chattr -i /root/.ssh/authorized_keys # remove the immutable attribute if exists
+       when: (def1_result.stdout != "DEFAULT_INFO") or (def2_result.stdout != "DEFAULT_INFO2") or (qnt_result.stdout != "X")
+
+     - name: Authorized Keys ROOT setting to default'
+       copy:
+        src: PATCH/auth_root_def
+        dest: /root/.ssh/authorized_keys
+        force: yes
+       when: (def1_result.stdout != "DEFAULT_INFO") or (def2_result.stdout != "DEFAULT_INFO2") or (qnt_result.stdout != "X")
+       
+     - name: Finishing Default 
+       shell: chattr +i /root/.ssh/authorized_keys # turns file immutable to avoid new changes
+       when: (def1_result.stdout != "DEFAULT_INFO") or (def2_result.stdout != "DEFAULT_INFO2") or (qnt_result.stdout != "X")

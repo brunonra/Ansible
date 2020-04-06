@@ -1,0 +1,28 @@
+---
+ - hosts: all
+   gather_facts: no
+   vars:
+       atl: DEFAULT_PATCH
+       ori: PLACE_WHERE_VMWARETOOLS_IS_PLACED
+
+   tasks:
+    - name: Get VMTOOLs version
+      shell: vmware-toolbox-cmd -v # Get the atual version of vmwaretools
+      register: coleta_result
+      ignore_errors: True
+
+    - name: Copu the latest version of VMTOOLs
+      copy:
+        src: PLACE_WHERE_VMWARETOOLS_IS_PLACED/VMwareTools-LATEST.tar
+        dest: /tmp/vm_new/
+        force: yes
+      when: coleta_result.stdout != "LATEST_VERSION"
+
+    - name: Unziping VMWWARETOOLS
+      shell: tar -xvf /tmp/vm_new/VMwareTools-10.3.10-12406962.tar -C /tmp/vm_new/
+      when: coleta_result.stdout != "LATEST_VERSION"
+
+
+    - name: Installing VMWARE TOOLS
+      shell: /tmp/vm_new/vmware-tools-distrib/vmware-install.pl -d
+      when: coleta_result.stdout != "LATEST_VERSION"
