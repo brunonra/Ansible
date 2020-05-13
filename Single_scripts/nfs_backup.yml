@@ -1,0 +1,26 @@
+---
+ - hosts: Yourhosts
+   gather_facts: no
+
+   tasks:
+     - name: Mount NFS on destination
+       register: mount_result
+       mount:
+         path: WHERE_TO_MOUNT_ON_DESTINATION
+         src: SERVER_NFS_ORIGIN:NFS_MOUNT_POINT
+         fstype: nfs
+         state: mounted
+
+     - name: compacting diretory
+       register: tar_result
+       archive:
+         path:
+         - PATH_YOU_WANT_COMPRESS
+         dest: WHERE TO ZIP (USE_THE_NFS_PATH)[AS LISTED ON THE PREVIOUS TASK]
+         format: bz2
+
+     - name: Desmontando NFS
+       register: umount_result
+       mount:
+         path: PATH_TO_UMOUNT [AS LISTED ON MOUNT TASK]
+         state: unmounted
