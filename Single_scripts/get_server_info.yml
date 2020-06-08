@@ -1,0 +1,40 @@
+     - name: Teste de Ping nos servidores 
+       ping:
+
+     - name: Pega o Ip do servidor
+       register: ip_result
+       shell: hostname -i |cut -d " " -f1
+
+     - name: Pega o IP no ansible
+       debug:
+         msg: "{{ ansible_default_ipv4.address }}"
+
+     - name: Testa acesso e hostname
+       register: hname_result
+       shell: hostname
+
+     - name: Pega o hostname no arquivo
+       register: nname_result
+       shell: cat /etc/sysconfig/network |grep -i hostname | cut -d "=" -f2
+
+     - name: Pega o nome no Kernel e valida 
+       register: krnl_result
+       shell: cat /proc/sys/kernel/hostname
+
+     - name: Arruma kernel hostname
+       shell: echo "{{ inventory_hostname|lower }}" > /proc/sys/kernel/hostname
+       when: ( hname_result.stdout != krnl_result.stdout )
+
+     - name: Arrumando chave 
+       copy:
+        src: path_of_origin/key
+        dest: /home_destination/.ssh/authorized_keys
+        force: yes
+
+     - name: Anexa conteudo ao arquivo
+       lineinfile:
+         dest: patch/file
+         line: "{{ hname_result.stdout }}"
+         insertafter: EOF
+       when: ( hname_result.stdout|lower == nname_result.stdout|lower )  and ( ansible_default_ipv4.address == ip_result.stdout )
+       delegate_to: localhost
