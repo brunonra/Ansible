@@ -1,0 +1,52 @@
+---
+  - hosts: Rundeck
+    gather_facts: no
+
+    tasks:
+    ######## Enable Rundeck Job to start another activity#######################
+     - name: enable Rundeck o job 
+       shell: patch_to_job/job.sh JOBID
+       tags:
+         - RunJob
+
+
+  - hosts: localhost
+    gather_facts: no
+
+    tasks:
+
+     - name: Create New File
+       file:
+         path: where_to_place/file.txt
+         state: touch
+
+     - name: Create Entry for later usage
+       lineinfile:
+         dest: where_to_place/file.txt
+         line: "{{ item }}"
+       with_items:
+         - "[TITLE]"
+         - "line1"
+         - "(blank line "
+         - "[Another title]"
+
+  - hosts: HostList1
+    gather_facts: yes
+    tasks:
+
+     - name: Validating files 1
+       include: patch/playbook.yml
+
+  - hosts: HostList2
+    gather_facts: yes
+    tasks:
+
+     - name: Validating files 2
+       include: patch/playbook2.yml
+
+  - hosts: Rundeck
+    tasks:
+
+     - name: Copiando file to rundeck
+       shell: scp -rp patch_to_file/Origin {{ inventory_hostname }}:patch_to_file/Destination
+       delegate_to: localhost
