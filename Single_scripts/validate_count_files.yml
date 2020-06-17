@@ -1,0 +1,25 @@
+---
+ - hosts: localhost
+   gather_facts: no
+   vars:
+      caminho: FULL_PATH_HERE
+
+   tasks:
+
+     - name: Conta arquivos AAA
+       shell: ls {{ caminho }} | grep "AAA" | wc -l
+       register: contagem_result
+
+     - name: Valida AAA
+       shell: ls {{ caminho }} | grep "AAA" | wc -l
+       register: contagem2_result
+       until: contagem2_result.stdout == "5"
+       retries: 5
+       delay: 3
+
+     - name: Valida BBB
+       shell: ls {{ caminho }} | grep "BBB" | wc -l
+       register: contagem2_result
+       until: contagem2_result.stdout == "5"
+       retries: 5
+       delay: 3
